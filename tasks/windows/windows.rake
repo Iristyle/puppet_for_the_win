@@ -223,7 +223,14 @@ namespace :windows do
     version_tracking_file = 'stagedir/misc/versions.txt'
     content = ""
     FileList["downloads/*"].each do |repo|
-      content += "#{File.basename(repo)} #{describe repo}\n"
+      is_git = Dir.exists?("#{repo}/.git")
+      if is_git
+        ver = describe(repo)
+      else
+        ver_path = ["#{repo}/VERSION", "#{repo}/bin/VERSION"].find { |f| File.exists?(f) }
+        ver = File.open(ver_path, "rb:bom|UCS-2BE", &:read).strip
+      end
+      content += "#{File.basename(repo)} #{ver}\n"
     end
 
     File.open(version_tracking_file, "wb") { |f| f.write(content) }
