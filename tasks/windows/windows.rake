@@ -189,6 +189,13 @@ namespace :windows do
     mkdir_p("stagedir/service")
     FileUtils.cp_r(FileList['downloads/puppet/ext/windows/service/*'], 'stagedir/service')
     FileUtils.cp('downloads/mcollective/ext/windows/daemon.bat', 'stagedir/service/mco_daemon.bat') if File.exists?('downloads/mcollective/ext/windows/daemon.bat')
+
+    # setup nssm - note - we are clobbering the downloads/nssm directory deliberately to stop the ":stage" task from copying nssm
+    # to stagedir and creating an (unused) wxs fragment file.
+    nssmwindir = ENV['ARCH'] == 'x64' ? 'win64' : 'win32'
+    FileUtils.cp("downloads/nssm/#{nssmwindir}/nssm.exe", 'stagedir/service/nssm.exe')
+    FileUtils.rm_rf('downloads/nssm')
+
   end
 
   task :stage => [:checkout, 'stagedir', :bin, :misc, :service] do
